@@ -2,7 +2,7 @@
 """
 Spyder Editor
 Author: Satyajit Bhuyan <satyajit.bhuyan@intel.com>
-This script ingests cfx json file and spits
+This script ingests cfx csv file and spits
 This is a temporary script file.
 """
 import pandas as pd
@@ -10,7 +10,6 @@ import math
 from tabulate import tabulate
 import json
 #ingest csv file | json do later
-# file_path = 'D:\SM4.csv'
 f = open(r'Farcry4.json')
 data = json.load(f)
 
@@ -23,8 +22,6 @@ for i in data['Runs']:
 
 #Main DataFrame
 df = pd.DataFrame(dict1)
-
-# df=pd.read_csv(file_path,skiprows=1)
 df.sort_values(by=['MsBetweenPresents'], ascending=False, inplace=True)
 df.reset_index(drop=True, inplace=True)
 
@@ -43,6 +40,7 @@ P99_frame_time = df['MsBetweenPresents'].quantile(q=0.99)
 P95_frame_time = df['MsBetweenPresents'].quantile(q=0.95)
 P5_frame_time = df['MsBetweenPresents'].quantile(q=0.05)
 P1_frame_time = df['MsBetweenPresents'].quantile(q=0.01)
+
 series = df['MsBetweenPresents']
 
 # Calculate 1% and 0.1% low integral
@@ -58,6 +56,7 @@ def lowavgintegral(time_1plow):
     return lowavg
 # Calculate 1% and 0.1% low integral
 def lowavg(count_1plow):
+
         lowavg = round(1000/series.head(count_1plow).mean(),3)
         return lowavg
 
@@ -74,10 +73,45 @@ table_data = [
     ("P99 fps:", round(1000 / P1_frame_time, 3)),
     ("1% low integral fps:", lowavgintegral(time_1plow)),
     ("0.1% low integral fps:", lowavgintegral(time_0p1plow)),
-    ("1% low avg fps:", lowavgintegral(count_1plow)),
-    ("0.1% low avg fps:", lowavgintegral(count_0p1plow))
+    ("1% low avg fps:", lowavg(count_1plow)),
+    ("0.1% low avg fps:", lowavg(count_0p1plow))
 ]
 
 table = tabulate(table_data, tablefmt='fancy_grid')
 print(table)
+
+import matplotlib.pyplot as plt
+
+# Your graph_data here
+graph_data = [
+    ("Avg fps:", round(1000 / mean_frame_time, 3)),
+    ("Max fps:", round(1000 / min_frame_time, 3)),
+    ("Min fps:", round(1000 / max_frame_time, 3)),
+    ("P1 fps:", round(1000 / P99_frame_time, 3)),
+    ("P5 fps:", round(1000 / P95_frame_time, 3)),
+    ("P95 fps:", round(1000 / P5_frame_time, 3)),
+    ("P99 fps:", round(1000 / P1_frame_time, 3)),
+    ("1% low integral fps:", lowavgintegral(time_1plow)),
+    ("0.1% low integral fps:", lowavgintegral(time_0p1plow)),
+    ("1% low avg fps:", lowavg(count_1plow)),
+    ("0.1% low avg fps:", lowavg(count_0p1plow))
+]
+
+# Extract labels and values from graph_data
+labels = [item[0] for item in graph_data]
+values = [item[1] for item in graph_data]
+
+# Create the bar graph
+plt.figure(figsize=(10, 6))
+bars = plt.barh(labels, values, color='skyblue')
+plt.xlabel('Frames per seconds')
+plt.ylabel('Metrics')
+plt.title('Game Performance Metrics')
+
+# Annotate bars with values
+for bar, value in zip(bars, values):
+    plt.text(value, bar.get_y() + bar.get_height() / 2, str(value), va='center', color='black')
+
+# Show the plot
+plt.show()
 
