@@ -2,7 +2,7 @@
 """
 Spyder Editor
 Author: Satyajit Bhuyan <satyajit.bhuyan@intel.com>
-This script ingests cfx csv file and spits
+This script ingests cfx json file and spits
 This is a temporary script file.
 """
 import pandas as pd
